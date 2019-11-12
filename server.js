@@ -8,6 +8,7 @@ var sqlite3 = require('sqlite3')
 var port = 8000;
 var public_dir = path.join(__dirname, 'public');
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
+var app = express();
 
 // open stpaul_crime.sqlite3 database
 var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
@@ -18,6 +19,56 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
         console.log('Now connected to ' + db_filename);
     }
 });
+
+/*
+Codes:
+code (INTEGER) - crime incident type numeric code
+incident_type (TEXT) - crime incident type description
+
+Neighborhoods:
+neighborhood_number (INTEGER) - neighborhood id
+neighborhood_name (TEXT) - neighborhood name
+
+Incidents:
+case_number (TEXT): unique id from crime case
+date_time (DATETIME): date and time when incident took place
+code (INTEGER): crime incident type numeric code
+incident (TEXT): crime incident description (more specific than incident_type)
+police_grid (INTEGER): police grid number where incident occurred
+neighborhood_number (INTEGER): neighborhood id where incident occurred
+block (TEXT): approximate address where incident occurred
+*/
+
+
+/* curl -x GET http://localhost:8000/code */
+app.get('/code', (req,res) => {
+	db.all("Select * from Codes", (err, rows) => {
+		console.log(rows);
+	});
+});
+
+/* curl -x GET http://localhost:8000/neighborhoods */
+app.get('/neighborhoods', (req,res) => {
+	db.all("Select * from Neighborhoods", (err, rows) => {
+		console.log(rows);
+	});
+});
+
+/* curl -x GET http://localhost:8000/incidents */
+app.get('/incidents', (req,res) => {
+	db.all("Select * from Incidents", (err, rows) => {
+		console.log(rows);
+	});
+});
+
+app.put('/new-incident', (req,res) => {
+	
+});
+
+console.log('Now Listening on port ' + port);
+var server = app.listen(port);
+
+
 
 /*
 
@@ -140,5 +191,3 @@ app.post('/update-user', (req, res) => {
 });
  */
 
-console.log('Now Listening on port ' + port);
-var server = app.listen(port);
