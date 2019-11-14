@@ -41,23 +41,122 @@ block (TEXT): approximate address where incident occurred
 
 
 /* curl -x GET http://localhost:8000/code */
-app.get('/code', (req,res) => {
+
+/*
+GET /codes
+Return JSON object with list of codes and their corresponding incident type. Note - keys cannot start with a number, therefore are prepended with a 'C'.
+Example:
+{
+  "C110": "Murder, Non Negligent Manslaughter",
+  "C120": "Murder, Manslaughter By Negligence",
+  "C210": "Rape, By Force",
+  "C220": "Rape, Attempt",
+  "C300": "Robbery",
+  "C311": "Robbery, Highway, Firearm",
+  "C312": "Robbery, Highway, Knife or Cutting Instrument",
+  "C313": "Robbery, Highway, Other Dangerous Weapons",
+  "C314": "Robbery, Highway, By Strong Arm",
+  ...
+}
+*/
+app.get('/codes', (req,res) => {
 	db.all("Select * from Codes", (err, rows) => {
-		console.log(rows);
+		//console.log(rows);
+		var codes = {};
+		for(var i = 0; i < rows.length; i++) {
+			codes['C' + rows[i].code] = rows[i].incident_type;
+		}
+		console.log(codes);
+		res.end();
 	});
 });
 
 /* curl -x GET http://localhost:8000/neighborhoods */
+/*
+GET /neighborhoods
+Return JSON object with list of neighborhood ids and their corresponding neighborhood name. Note - keys cannot start with a number, therefore are prepended with a 'N'.
+Example:
+{
+  "N1": "Conway/Battlecreek/Highwood",
+  "N2": "Greater East Side",
+  "N3": "West Side",
+  "N4": "Dayton's Bluff",
+  "N5": "Payne/Phalen",
+  "N6": "North End",
+  "N7": "Thomas/Dale(Frogtown)",
+  "N8": "Summit/University",
+  "N9": "West Seventh",
+  "N10": "Como",
+  "N11": "Hamline/Midway",
+  "N12": "St. Anthony",
+  "N13": "Union Park",
+  "N14": "Macalester-Groveland",
+  "N15": "Highland",
+  "N16": "Summit Hill",
+  "N17": "Capitol River"
+}
+*/
 app.get('/neighborhoods', (req,res) => {
 	db.all("Select * from Neighborhoods", (err, rows) => {
 		console.log(rows);
+		var neighborhoods = {};
+		for(var i = 0; i < rows.length; i++) {
+			neighborhoods['N' + rows[i].neighborhood_number] = rows[i].neighborhood_name;
+		}
+		console.log(neighborhoods);
+		res.end();
 	});
 });
 
 /* curl -x GET http://localhost:8000/incidents */
+/*
+GET /incidents
+Return JSON object with list of crime incidents. Make date and time separate fields. Note - keys cannot start with a number, therefore are prepended with a 'I'.
+Example:
+{
+  "I19245020": {
+    "date": "2019-10-30",
+    "time": "23:57:08",
+    "code": 9954,
+    "incident": "Proactive Police Visit",
+    "police_grid": 87,
+    "neighborhood_number": 7,
+    "block": "THOMAS AV  & VICTORIA"
+  },
+  "I19245016": {
+    "date": "2019-10-30",
+    "time": "23:53:04",
+    "code": 9954,
+    "incident": "Proactive Police Visit",
+    "police_grid": 87,
+    "neighborhood_number": 7,
+    "block": "98X UNIVERSITY AV W"
+  },
+  "I19245014": {
+    "date": "2019-10-30",
+    "time": "23:43:19",
+    "code": 700,
+    "incident": "Auto Theft",
+    "police_grid": 95,
+    "neighborhood_number": 4,
+    "block": "79X 6 ST E"
+  },
+  ...
+}
+*/
 app.get('/incidents', (req,res) => {
 	db.all("Select * from Incidents", (err, rows) => {
 		console.log(rows);
+		var incidents = {};
+		for(var i = 0; i < rows.length; i++) {
+			//incidents['I' + rows[i].case_number] = {};
+			//incidents['I' + rows[i].case_number].date = rows[i].date;
+			//incidents['I' + rows[i].case_number].time = rows[i].date;
+			//incidents['I' + rows[i].case_number].code = rows[i].code;
+			//incidents['I' + rows[i].case_number].incident = rows[i].date;
+		}
+		console.log(incidents);
+		res.end();
 	});
 });
 
