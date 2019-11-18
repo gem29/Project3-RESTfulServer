@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
-var js2xmlparser = require("js2xmlparser");
+//var js2xmlparser = require("js2xmlparser");
 var sqlite3 = require('sqlite3')
 
 var port = 8000;
@@ -19,6 +19,28 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
         console.log('Now connected to ' + db_filename);
     }
 });
+
+var all_codes = [];
+db.all('select code from Codes order by code', (err, rows) => {
+	for(var i = 0; i<rows.length; i++) {
+		all_codes.push(rows[i].code);
+	}
+});
+
+var all_grids = [];
+db.all('select distinct police_grid from Incidents where police_grid > 0 order by police_grid', (err, rows) => {
+	for(var i = 0; i<rows.length; i++) {
+		all_grids.push(rows[i].police_grid);
+	}
+});
+
+var all_neighborhoods = [];
+db.all('select distinct neighborhood_number from Neighborhoods order by neighborhood_number', (err, rows) => {
+	for(var i = 0; i<rows.length; i++) {
+		all_neighborhoods.push(rows[i].neighborhood_number);
+	}
+});
+
 
 /*
 Codes:
@@ -58,16 +80,33 @@ Example:
   "C314": "Robbery, Highway, By Strong Arm",
   ...
 }
+
+Add the following query options for GET /codes (2 pts)
+code - comma separated list of codes to include in result (e.g. ?code=110,700). By default all codes should be included.
+format - json or xml (e.g. ?format=xml). By default JSON format should be used.
+
 */
 app.get('/codes', (req,res) => {
-	db.all("Select * from Codes", (err, rows) => {
-		//console.log(rows);
+	var code_list = all_codes;
+	if(req.query.hasOwnProperty('code')) {
+    	code_list = req.query.code.split(',');
+    	/*console.log(string_code);
+    	for(var i in string_code) {
+    		code_list[i] = parseInt(string_code[i],10);
+    	}*/
+    }
+	db.all("Select * from Codes where code in (" + code_list + ") order by code", (err, rows) => {
+		console.log(rows);
 		var codes = {};
+		/*if(req.query.hasOwnProperty('code')) {
+			code_list 
+		}*/
 		for(var i = 0; i < rows.length; i++) {
 			codes['C' + rows[i].code] = rows[i].incident_type;
 		}
-		console.log(codes);
-		res.end();
+		//console.log(codes);
+		//if(req.query.xml)
+		res.type('json').send(codes);
 	});
 });
 
@@ -95,16 +134,28 @@ Example:
   "N16": "Summit Hill",
   "N17": "Capitol River"
 }
+
+Add the following query options for GET /neighborhoods (2 pts)
+id - comma separated list of neighborhood numbers to include in result (e.g. ?id=11,14). By default all neighborhoods should be included.
+format - json or xml (e.g. ?format=xml). By default JSON format should be used.
+
 */
 app.get('/neighborhoods', (req,res) => {
-	db.all("Select * from Neighborhoods", (err, rows) => {
-		console.log(rows);
+	var neighborhood_list = all_neighborhoods;
+	if(req.query.hasOwnProperty('id')) {
+    	neighborhood_list = req.query.id.split(',');
+    	/*for(var i in string_grid) {
+    		neighborhood_list[i] = parseInt(string_neighborhood[i],10);
+    	}*/
+    }
+	db.all("Select * from Neighborhoods where neighborhood_number in (" + neighborhood_list + ")", (err, rows) => {
+		//console.log(rows);
 		var neighborhoods = {};
 		for(var i = 0; i < rows.length; i++) {
 			neighborhoods['N' + rows[i].neighborhood_number] = rows[i].neighborhood_name;
 		}
-		console.log(neighborhoods);
-		res.end();
+		//console.log(neighborhoods);
+		res.type('json').send(neighborhoods);
 	});
 });
 
@@ -142,21 +193,88 @@ Example:
     "block": "79X 6 ST E"
   },
   ...
+  	start_date - first date to include in results (e.g. ?start_date=2019-09-01)
+	end_date - last date to include in results (e.g. ?end_date=2019-10-31)
+	code - comma separated list of codes to include in result (e.g. ?code=110,700). By default all codes should be included.
+	grid - comma separated list of police grid numbers to include in result (e.g. ?grid=38,65). By default all police grids should be included.
+	neighborhood - comma separated list of neighborhood numbers to include in result (e.g. ?id=11,14). By default all neighborhoods should be included.
+	limit - maximum number of incidents to include in result (e.g. ?limit=50). By default the limit should be 10,000. Result should include the N most recent incidents.
+	format - json or xml (e.g. ?format=xml). By default JSON format should be used.
 }
 */
 app.get('/incidents', (req,res) => {
-	db.all("Select * from Incidents", (err, rows) => {
-		console.log(rows);
+	var limit = 10000;
+	var start_date = '2019-09-01';
+	var end_date = '2019-11-01';
+	var code_list = all_codes;
+	var grid_list = all_grids;
+	var neighborhood_list = all_neighborhoods;
+	var format = 'json';
+	if (req.query.hasOwnProperty('limit')) {
+        limit = Math.min(limit,parseInt(req.query.limit, 10));
+    }
+    if(req.query.hasOwnProperty('start_date')) {
+    	start_date = req.query.start_date;
+    }
+    if(req.query.hasOwnProperty('end_date')) {
+    	end_date = req.query.end_date;
+    }
+    if(req.query.hasOwnProperty('code')) {
+    	code_list = req.query.code.split(',');
+    	/*console.log(string_code);
+    	for(var i in string_code) {
+    		code_list[i] = parseInt(string_code[i],10);
+    	}*/
+    }
+    if(req.query.hasOwnProperty('grid')) {
+    	var grid_list = req.query.grid.split(',');
+    	/*for(var i in string_grid) {
+    		grid_list[i] = parseInt(string_grid[i],10);
+    	}*/
+    }
+    if(req.query.hasOwnProperty('neighborhood')) {
+    	neighborhood_list = req.query.neighborhood.split(',');
+    	/*for(var i in string_grid) {
+    		neighborhood_list[i] = parseInt(string_neighborhood[i],10);
+    	}*/
+    }
+    //console.log("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit);
+	db.all("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit, (err, rows) => {
+		if(err) {console.log(err);}
+		/*{ case_number: '15132434',
+	    date_time: '2015-06-26T07:09:00',
+	    code: 1400,
+	    incident: 'Vandalism',
+	    police_grid: 74,
+	    neighborhood_number: 5,
+	    block: '77X CASE AV' }*/
+		//console.log(rows);
 		var incidents = {};
 		for(var i = 0; i < rows.length; i++) {
+			let this_date = rows[i].date_time.substring(0,10);
+			let this_time = rows[i].date_time.substring(11,19);
+			let this_code = rows[i].code;
+			let this_incident = rows[i].incident;
+			let this_police_grid = rows[i].police_grid;
+			let this_neighborhood_number = rows[i].neighborhood_number;
+			let this_block = rows[i].block;
+			incidents['I' + rows[i].case_number] = {};
+			incidents['I' + rows[i].case_number].date = this_date;
+			incidents['I' + rows[i].case_number].time = this_time;
+			incidents['I' + rows[i].case_number].code = this_code;
+			incidents['I' + rows[i].case_number].incident = this_incident;
+			incidents['I' + rows[i].case_number].police_grid = this_police_grid;
+			incidents['I' + rows[i].case_number].neighborhood_number = this_neighborhood_number;
+			incidents['I' + rows[i].case_number].block = this_block;
 			//incidents['I' + rows[i].case_number] = {};
 			//incidents['I' + rows[i].case_number].date = rows[i].date;
 			//incidents['I' + rows[i].case_number].time = rows[i].date;
 			//incidents['I' + rows[i].case_number].code = rows[i].code;
 			//incidents['I' + rows[i].case_number].incident = rows[i].date;
 		}
-		console.log(incidents);
-		res.end();
+		//console.log(incidents);
+		//if(req.query.hasOwnProperty('xml')) {}
+		res.type('json').send(incidents);
 	});
 });
 
