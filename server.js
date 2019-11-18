@@ -91,22 +91,13 @@ app.get('/codes', (req,res) => {
 	var format = 'json';
 	if(req.query.hasOwnProperty('code')) {
     	code_list = req.query.code.split(',');
-    	/*console.log(string_code);
-    	for(var i in string_code) {
-    		code_list[i] = parseInt(string_code[i],10);
-    	}*/
     }
 	db.all("Select * from Codes where code in (" + code_list + ") order by code", (err, rows) => {
 		console.log(rows);
 		var codes = {};
-		/*if(req.query.hasOwnProperty('code')) {
-			code_list 
-		}*/
 		for(var i = 0; i < rows.length; i++) {
 			codes['C' + rows[i].code] = rows[i].incident_type;
 		}
-		//console.log(codes);
-		//if(req.query.xml)
 		if(req.query.format == 'xml') {
 			codes = js2xmlparser.parse('codes', codes);
 			format = 'xml';
@@ -150,9 +141,6 @@ app.get('/neighborhoods', (req,res) => {
 	var format = 'json';
 	if(req.query.hasOwnProperty('id')) {
     	neighborhood_list = req.query.id.split(',');
-    	/*for(var i in string_grid) {
-    		neighborhood_list[i] = parseInt(string_neighborhood[i],10);
-    	}*/
     }
 	db.all("Select * from Neighborhoods where neighborhood_number in (" + neighborhood_list + ")", (err, rows) => {
 		//console.log(rows);
@@ -160,7 +148,6 @@ app.get('/neighborhoods', (req,res) => {
 		for(var i = 0; i < rows.length; i++) {
 			neighborhoods['N' + rows[i].neighborhood_number] = rows[i].neighborhood_name;
 		}
-		//console.log(neighborhoods);
 		if(req.query.format == 'xml') {
 			neighborhoods = js2xmlparser.parse('neighborhoods', neighborhoods);
 			format = 'xml';
@@ -231,33 +218,16 @@ app.get('/incidents', (req,res) => {
     }
     if(req.query.hasOwnProperty('code')) {
     	code_list = req.query.code.split(',');
-    	/*console.log(string_code);
-    	for(var i in string_code) {
-    		code_list[i] = parseInt(string_code[i],10);
-    	}*/
     }
     if(req.query.hasOwnProperty('grid')) {
     	var grid_list = req.query.grid.split(',');
-    	/*for(var i in string_grid) {
-    		grid_list[i] = parseInt(string_grid[i],10);
-    	}*/
     }
     if(req.query.hasOwnProperty('neighborhood')) {
     	neighborhood_list = req.query.neighborhood.split(',');
-    	/*for(var i in string_grid) {
-    		neighborhood_list[i] = parseInt(string_neighborhood[i],10);
-    	}*/
     }
     //console.log("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit);
 	db.all("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit, (err, rows) => {
 		if(err) {console.log(err);}
-		/*{ case_number: '15132434',
-	    date_time: '2015-06-26T07:09:00',
-	    code: 1400,
-	    incident: 'Vandalism',
-	    police_grid: 74,
-	    neighborhood_number: 5,
-	    block: '77X CASE AV' }*/
 		//console.log(rows);
 		var incidents = {};
 		for(var i = 0; i < rows.length; i++) {
@@ -276,14 +246,7 @@ app.get('/incidents', (req,res) => {
 			incidents['I' + rows[i].case_number].police_grid = this_police_grid;
 			incidents['I' + rows[i].case_number].neighborhood_number = this_neighborhood_number;
 			incidents['I' + rows[i].case_number].block = this_block;
-			//incidents['I' + rows[i].case_number] = {};
-			//incidents['I' + rows[i].case_number].date = rows[i].date;
-			//incidents['I' + rows[i].case_number].time = rows[i].date;
-			//incidents['I' + rows[i].case_number].code = rows[i].code;
-			//incidents['I' + rows[i].case_number].incident = rows[i].date;
 		}
-		//console.log(incidents);
-		//if(req.query.hasOwnProperty('xml')) {}
 		if(req.query.format == 'xml') {
 			incidents = js2xmlparser.parse('incidents', incidents);
 			format = 'xml';
@@ -298,127 +261,4 @@ app.put('/new-incident', (req,res) => {
 
 console.log('Now Listening on port ' + port);
 var server = app.listen(port);
-
-
-
-/*
-
-var users;
-var users_filename = path.join(public_dir, 'users.json');
-fs.readFile(users_filename, (err, data) => {
-	if(err) {
-		console.log('Error reading users.json');
-		users = {users: []};
-	}
-	else {
-		users = JSON.parse(data);
-	}
-});
-
-var app = express();
-app.use(express.static(public_dir));
-app.use(bodyParser.urlencoded({extended: true}));
-
-app.get('/list-users', (req, res) => {
-	/*res.writeHead(200, {'Content-Type': 'application/json'});
-	res.write(JSON.stringify(users));
-	console.log(users);
-	res.end();
-	if(req.query.limit) {
-		var limited_users = {'users': []};
-		for(var i = 0; i<req.query.limit; i++) {
-			limited_users.users.push[users.users[i]];
-		}
-		console.log(limited_users);
-	}
-	if(req.query.format == 'xml') {
-		if(req.query.limit) {
-		res.writeHead(200, {'Content-Type': 'application/xml'});
-		res.write(js2xmlparser.parse('user',limited_users));
-		console.log(js2xmlparser.parse('user',limited_users));
-		}
-		else {
-			res.writeHead(200, {'Content-Type': 'application/json'});
-			res.write(js2xmlparser.parse('user',users));
-		}
-		//console.log(users);
-		res.end();
-	} else {
-		res.type('json').send(users);
-	}
-});
-
-app.put('/add-user', (req, res) => {
-	//console.log("body: " + JSON.stringify(req.body));
-	var new_user = {
-		id: parseInt(req.body.id),
-		name: req.body.name,
-		email: req.body.email
-	};
-	var has_id = false;
-	for(let i=0; i<users.users.length; i++) {
-		if(users.users[i].id === new_user.id) { has_id = true; }
-	}
-	if(has_id){
-		res.status(500).send('Error: Id ' + req.body.id + ' already exists');
-		res.end();
-	} else {
-		users.users.push(new_user);
-		console.log("Success");
-		console.log(JSON.stringify(users));
-		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.write(JSON.stringify(users));
-		res.end();
-	}
-});
-
-app.delete('/remove-user', (req, res) => {
-	//console.log("body: " + JSON.stringify(req.body));
-	var removed_user = {
-		id: parseInt(req.body.id),
-	};
-	var index = -1;
-	for(let i = 0; i<users.users.length; i++) {
-		if(users.users[i].id == req.body.id) { index = i;}
-	}
-	if(index == -1){
-		res.status(500).send('Error: Id ' + req.body.id + ' does not exist');
-		res.end();
-	} else {
-		users.users.splice(index,1);
-		console.log("Success");
-		console.log(JSON.stringify(users));
-		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.write(JSON.stringify(users));
-		res.end();
-	}
-});
-
-
-app.post('/update-user', (req, res) => {
-	var new_user = {
-		id: parseInt(req.body.id),
-		name: req.body.name,
-		email: req.body.email
-	};
-	var index = -1;
-	for(let i = 0; i<users.users.length; i++) {
-		if(users.users[i].id == req.body.id) { index = i;}
-	}
-	//console.log(new_user);
-	if(index == -1) {
-		res.status(500).send('Error: Id ' + req.body.id + ' does not exist');
-		res.end();
-	}
-	else {
-		users.users[index].name = new_user.name;
-		users.users[index].email = new_user.email;
-		console.log("Success");
-		console.log(JSON.stringify(users));
-		res.writeHead(200, {'Content-Type': 'application/json'});
-		res.write(js2xml.parse(users));
-		res.end();
-	}
-});
- */
 
