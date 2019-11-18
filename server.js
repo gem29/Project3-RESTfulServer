@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
-//var js2xmlparser = require("js2xmlparser");
+var js2xmlparser = require("js2xmlparser");
 var sqlite3 = require('sqlite3')
 
 var port = 8000;
@@ -88,6 +88,7 @@ format - json or xml (e.g. ?format=xml). By default JSON format should be used.
 */
 app.get('/codes', (req,res) => {
 	var code_list = all_codes;
+	var format = 'json';
 	if(req.query.hasOwnProperty('code')) {
     	code_list = req.query.code.split(',');
     	/*console.log(string_code);
@@ -106,7 +107,11 @@ app.get('/codes', (req,res) => {
 		}
 		//console.log(codes);
 		//if(req.query.xml)
-		res.type('json').send(codes);
+		if(req.query.format == 'xml') {
+			codes = js2xmlparser.parse('codes', codes);
+			format = 'xml';
+		}
+		res.type(format).send(codes);
 	});
 });
 
@@ -142,6 +147,7 @@ format - json or xml (e.g. ?format=xml). By default JSON format should be used.
 */
 app.get('/neighborhoods', (req,res) => {
 	var neighborhood_list = all_neighborhoods;
+	var format = 'json';
 	if(req.query.hasOwnProperty('id')) {
     	neighborhood_list = req.query.id.split(',');
     	/*for(var i in string_grid) {
@@ -155,7 +161,11 @@ app.get('/neighborhoods', (req,res) => {
 			neighborhoods['N' + rows[i].neighborhood_number] = rows[i].neighborhood_name;
 		}
 		//console.log(neighborhoods);
-		res.type('json').send(neighborhoods);
+		if(req.query.format == 'xml') {
+			neighborhoods = js2xmlparser.parse('neighborhoods', neighborhoods);
+			format = 'xml';
+		}
+		res.type(format).send(neighborhoods);
 	});
 });
 
@@ -274,7 +284,11 @@ app.get('/incidents', (req,res) => {
 		}
 		//console.log(incidents);
 		//if(req.query.hasOwnProperty('xml')) {}
-		res.type('json').send(incidents);
+		if(req.query.format == 'xml') {
+			incidents = js2xmlparser.parse('incidents', incidents);
+			format = 'xml';
+		}
+		res.type(format).send(incidents);
 	});
 });
 
