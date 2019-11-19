@@ -3,15 +3,19 @@ var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var js2xmlparser = require("js2xmlparser");
-var sqlite3 = require('sqlite3')
+var sqlite3 = require('sqlite3');
+var cors = require('cors');
 
 var port = 8000;
 var public_dir = path.join(__dirname, 'public');
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 var app = express();
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
+
 // open stpaul_crime.sqlite3 database
-var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
+var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.log('Error opening ' + db_filename);
     }
@@ -41,6 +45,12 @@ db.all('select distinct neighborhood_number from Neighborhoods order by neighbor
 	}
 });
 
+var all_incidents = {};
+db.all('select distinct case_number from Incidents order by case_number', (err, rows) => {
+	for(var i = 0; i<rows.length; i++) {
+		all_incidents[rows[i]] = true;
+	}
+});
 
 /*
 Codes:
@@ -255,9 +265,88 @@ app.get('/incidents', (req,res) => {
 	});
 });
 
+/*
+PUT /new-incident
+Upload incident data to be inserted into the SQLite3 database
+Data fields:
+case_number
+date
+time
+code
+incident
+police_grid
+neighborhood_number
+block
+Note: response should reject (status 500) if the case number already exists in the database
+*/
+
 app.put('/new-incident', (req,res) => {
-	
+	if(all_incidents[req.body.case_number]) {
+		res.status(500).send('Error: Case number ' + req.body.case_number + ' is already in the database');
+	}
+	else {
+		all_incidents[req.body.case_number] = true;
+		console.log(req.body);
+		var new_case = {
+			case_number : parseInt(req.body.case_number),
+			code : parseInt(req.body.code),
+			incident : (req.body.incident),
+			police_grid: parseInt(req.body.police_grid),
+			date: req.body.date,
+			time: req.body.time,
+			neighborhood_number: parseInt(req.body.neighborhood_number),
+			block: req.body.block
+		};
+
+		//console.log(new_case);
+
+		if(new_case.date){
+			new_case.date_time=new_case.date+new_case.time;
+			var dateObj = new Date(new_case.date + ' ' + new_case.time);
+			console.log(dateObj);
+		}
+
+		var sql ='INSERT INTO Incidents (case_number, code, incident,police_grid,neighborhood_number, block,date_time) VALUES (?,?,?,?,?,?,?)'
+		var params =[new_case.case_number, new_case.code, new_case.incident,new_case.police_grid,new_case.neighborhood_number,new_case.block,new_case.date_time]
+	   
+
+		db.run(sql, params, function (err, result) {
+			if (err){
+				console.log(err)
+				res.status(400).send('SQL Error');
+			} else
+			{
+				res.status(200).send('Success!');
+			}
+		});
+	};
 });
+
+
+/*app.put('/new-incident', (req,res) => {
+	var this_case_number = req.query.case_number;
+	var this_date = req.query.date;
+	var this_time = req.query.time;
+	var this_code = req.query.code;
+	var this_incident = req.query.code;
+	var this_police_grid = req.query.police_grid;
+	var this_neighborhood_number = req.query.neighborhood_number;
+	var this_block = req.query.block;
+	
+	var this_date_time = this_date + 'T' + this_time;
+	console.log(this_date_time);
+	if(all_incidents[req.query.case_number]) {
+		res.status(500).send('Error: Case number ' + req.query.case_number + ' is already in the database');
+	}
+	else {
+		//add to database
+		console.log('insert into Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) Values (' + this_case_number + ', ' + this_date_time + ', ' + this_code + ', ' + this_incident + ', ' + this_police_grid + ', ' + this_neighborhood_number + ', ' + this_block + ')');
+		db.all('insert into Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) Values (' + this_case_number + ', ' + this_date_time + ', ' + this_code + ', ' + this_incident + ', ' + this_police_grid + ', ' + this_neighborhood_number + ', ' + this_block + ')', (err, rows) => {
+			console.log(rows);
+			res.type('json').send(rows);
+		});
+	}
+});*/
 
 console.log('Now Listening on port ' + port);
 var server = app.listen(port);
