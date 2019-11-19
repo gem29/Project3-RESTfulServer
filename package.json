@@ -15,7 +15,7 @@
     "main": "server.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/TechnoArtist/Project2-DynamicServer.git"
+        "url": "https://github.com/gem29/Project3-RESTfulServer"
     },
     "dependencies": {
         "express": "^4.17.1",
