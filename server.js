@@ -45,12 +45,7 @@ db.all('select distinct neighborhood_number from Neighborhoods order by neighbor
 	}
 });
 
-var all_incidents = {};
-db.all('select distinct case_number from Incidents order by case_number', (err, rows) => {
-	for(var i = 0; i<rows.length; i++) {
-		all_incidents[rows[i]] = true;
-	}
-});
+
 
 /*
 Codes:
@@ -211,8 +206,8 @@ Example:
 */
 app.get('/incidents', (req,res) => {
 	var limit = 10000;
-	var start_date = '2019-09-01';
-	var end_date = '2019-11-01';
+	var start_date = '0000-01-01';
+	var end_date = '9999-12-31';
 	var code_list = all_codes;
 	var grid_list = all_grids;
 	var neighborhood_list = all_neighborhoods;
@@ -281,45 +276,52 @@ Note: response should reject (status 500) if the case number already exists in t
 */
 
 app.put('/new-incident', (req,res) => {
-	if(all_incidents[req.body.case_number]) {
-		res.status(500).send('Error: Case number ' + req.body.case_number + ' is already in the database');
-	}
-	else {
-		all_incidents[req.body.case_number] = true;
-		console.log(req.body);
-		var new_case = {
-			case_number : parseInt(req.body.case_number),
-			code : parseInt(req.body.code),
-			incident : (req.body.incident),
-			police_grid: parseInt(req.body.police_grid),
-			date: req.body.date,
-			time: req.body.time,
-			neighborhood_number: parseInt(req.body.neighborhood_number),
-			block: req.body.block
-		};
-
-		//console.log(new_case);
-
-		if(new_case.date){
-			new_case.date_time=new_case.date+new_case.time;
-			var dateObj = new Date(new_case.date + ' ' + new_case.time);
-			console.log(dateObj);
-		}
-
-		var sql ='INSERT INTO Incidents (case_number, code, incident,police_grid,neighborhood_number, block,date_time) VALUES (?,?,?,?,?,?,?)'
-		var params =[new_case.case_number, new_case.code, new_case.incident,new_case.police_grid,new_case.neighborhood_number,new_case.block,new_case.date_time]
-	   
-
-		db.run(sql, params, function (err, result) {
-			if (err){
-				console.log(err)
-				res.status(400).send('SQL Error');
-			} else
-			{
-				res.status(200).send('Success!');
+	db.all('select * from Incidents where case_number = ' + req.body.case_number, (err, rows) => {
+		if(err) {
+			console.log(err)
+			res.status(400).send('SQL Error');
+		} else
+		{
+			if(rows !== undefined && rows.length != 0) {
+				res.status(500).send('Error: Case number ' + req.body.case_number + ' is already in the database');
 			}
-		});
-	};
+			else {
+				console.log(req.body);
+				var new_case = {
+					case_number : parseInt(req.body.case_number),
+					code : parseInt(req.body.code),
+					incident : (req.body.incident),
+					police_grid: parseInt(req.body.police_grid),
+					date: req.body.date,
+					time: req.body.time,
+					neighborhood_number: parseInt(req.body.neighborhood_number),
+					block: req.body.block
+				};
+
+				//console.log(new_case);
+
+				if(new_case.date){
+					new_case.date_time=new_case.date+new_case.time;
+					var dateObj = new Date(new_case.date + ' ' + new_case.time);
+					console.log(dateObj);
+				}
+
+				var sql ='INSERT INTO Incidents (case_number, code, incident,police_grid,neighborhood_number, block,date_time) VALUES (?,?,?,?,?,?,?)'
+				var params =[new_case.case_number, new_case.code, new_case.incident,new_case.police_grid,new_case.neighborhood_number,new_case.block,new_case.date_time]
+			   
+
+				db.run(sql, params, function (err, result) {
+					if (err){
+						console.log(err)
+						res.status(400).send('SQL Error');
+					} else
+					{
+						res.status(200).send('Success!');
+					}
+				});
+			};
+		};
+	});
 });
 
 
