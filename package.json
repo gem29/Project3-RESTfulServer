@@ -1,7 +1,7 @@
 {
     "name": "dynamic-webserver",
     "version": "0.0.0",
-    "description": "Dynamic Web Server using Node JS",
+    "description": "RESTful API using St. Paul crime data",
     "author": {
         "name": "Khalid Almutairi",
         "email": "almu2716@stthomas.edu"
