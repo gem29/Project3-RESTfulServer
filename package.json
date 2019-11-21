@@ -3,10 +3,14 @@
     "version": "0.0.0",
     "description": "RESTful API using St. Paul crime data",
     "author": {
-        "name": "Khalid Almutairi",
-        "email": "almu2716@stthomas.edu"
+        "name": "George McGivern",
+        "email": "mcgi7746@stthomas.edu"       
     },
     "contributors": [
+        {
+            "name": "Khalid Almutairi",
+            "email": "almu2716@stthomas.edu"
+        },
         {
             "name": "George McGivern",
             "email": "mcgi7746@stthomas.edu"
