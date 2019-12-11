@@ -98,7 +98,7 @@ app.get('/codes', (req,res) => {
     	code_list = req.query.code.split(',');
     }
 	db.all("Select * from Codes where code in (" + code_list + ") order by code", (err, rows) => {
-		console.log(rows);
+		//console.log(rows);
 		var codes = {};
 		for(var i = 0; i < rows.length; i++) {
 			codes['C' + rows[i].code] = rows[i].incident_type;
@@ -256,6 +256,7 @@ app.get('/incidents', (req,res) => {
 			incidents = js2xmlparser.parse('incidents', incidents);
 			format = 'xml';
 		}
+		console.log(incidents);
 		res.type(format).send(incidents);
 	});
 });
@@ -286,7 +287,7 @@ app.put('/new-incident', (req,res) => {
 				res.status(500).send('Error: Case number ' + req.body.case_number + ' is already in the database');
 			}
 			else {
-				console.log(req.body);
+				//console.log(req.body);
 				var new_case = {
 					case_number : parseInt(req.body.case_number),
 					code : parseInt(req.body.code),

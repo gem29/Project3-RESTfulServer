@@ -5,21 +5,96 @@
    		<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
 			   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
 			   crossorigin=""></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
 		<script type="application/javascript">
 			var app;
+
 			function Init() {
 			    app = new Vue({
 			        el: "#app",
-			        data: {
-			        	message: 'Hello Vue!', 
-			        	crimes: [
-			        		{case: '1', date: '2', time: '3', code: '4', incident: '5', grid: '6', neighborhood: '7', block: '8'}, 
-			        		{case: '2', date: '2', time: '3', code: '4', incident: '5', grid: '6', neighborhood: '7', block: '8'}
-			        	]
-			        }
+			        data: 
+			        	{
+			        		crimes: {},
+			        		codes: {},
+			        		neighborhoods: {}    	
+							
+			        	}
 			    });
-			 	
+			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31', {
+				  success: (data) => {
+				  	//console.log(data);
+				  	/*for(i in Object.keys(data))
+				  	{
+				  		app.crimes[Object.keys(data)[i]] = data[Object.keys(data)[i]];
+				  	}*/
+				  	app.crimes = data;
+
+				  	/*
+				  	I19244992: Object
+					block: (...)
+					code: (...)
+					date: (...)
+					incident: (...)
+					neighborhood_number: (...)
+					police_grid: (...)
+					time: (...)
+					*/
+					console.log(app.crimes);
+
+				  },
+				  error: (err) => { console.log(err) }
+				});
+
+				$.ajax('http://localhost:8000/neighborhoods', {
+				  success: (data) => {
+				  	console.log(data);
+				  	/*for(i in Object.keys(data))
+				  	{
+				  		app.crimes[Object.keys(data)[i]] = data[Object.keys(data)[i]];
+				  	}*/
+				  	app.neighborhoods = data;
+
+				  	/*
+				  	I19244992: Object
+					block: (...)
+					code: (...)
+					date: (...)
+					incident: (...)
+					neighborhood_number: (...)
+					police_grid: (...)
+					time: (...)
+					*/
+					//console.log(app.crimes);
+
+				  },
+				  error: (err) => { console.log(err) }
+				});
+
+				$.ajax('http://localhost:8000/codes', {
+				  success: (data) => {
+				  	console.log(data);
+				  	/*for(i in Object.keys(data))
+				  	{
+				  		app.crimes[Object.keys(data)[i]] = data[Object.keys(data)[i]];
+				  	}*/
+				  	app.codes = data;
+
+				  	/*
+				  	I19244992: Object
+					block: (...)
+					code: (...)
+					date: (...)
+					incident: (...)
+					neighborhood_number: (...)
+					police_grid: (...)
+					time: (...)
+					*/
+					//console.log(app.crimes);
+
+				  },
+				  error: (err) => { console.log(err) }
+				});
 			}
 		</script>
 	</head>
@@ -78,7 +153,6 @@
 		                        <th>Case</th>
 		                        <th>Date</th>
 		                        <th>Time</th>
-		                        <th>Code</th>
 		                        <th>Incident</th>
 		                        <th>Grid</th>
 		                        <th>Neighborhood</th>
@@ -86,15 +160,14 @@
 		                    </tr>
 		                </thead>
 		                <tbody>
-		                	<tr v-for="item in crimes">
-		                		<td>{{ item.case }}</td>
-				        		<td>{{ item.date }}</td>
-				        		<td>{{ item.time }}</td>
-				        		<td>{{ item.code }}</td>
-				        		<td>{{ item.incident }}</td>
-				        		<td>{{ item.grid }}</td>
-				        		<td>{{ item.neighborhood }}</td>
-				        		<td>{{ item.block }}</td>
+		                	<tr v-for="(i,k) in crimes">
+		                		<td>{{ k }}</td>
+				        		<td>{{ i.date }}</td>
+				        		<td>{{ i.time }}</td>
+				        		<td>{{ i.incident }}</td>
+				        		<td>{{ i.police_grid }}</td>
+				        		<td>{{ app.neighborhoods['N'+i.neighborhood_number] }}</td>
+				        		<td>{{ i.block }}</td>
 		                	</tr>
 		                </tbody>
 		            </table>
