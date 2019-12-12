@@ -45,7 +45,8 @@
 			        		'view_address': "",
 			        		checkedCases: [],
 			        		bounds: [(44.991548, -93.207680), (44.889845, -93.002029)],
-			        		filters: {incident_type: [], neighborhood_name: [], start_date: '', end_date: '', start_time: '', end_time: ''}  	
+			        		filters: {incident_type: [], neighborhood_name: [], start_date: '', end_date: '', start_time: '', end_time: ''},
+			        		violent_crimes: ['Rape', 'Proactive Police Visit']  	
 							
 			        	}
 			    });
@@ -191,7 +192,7 @@
 		                </thead>
 		                <tbody>
 		                	<tr v-for="(i,k) in crimes" v-if="mymap.getBounds().contains(app.neighborhoods['N'+i.neighborhood_number].latlon)" 
-		                	v-bind:class="{'violent':(i.incident=='Proactive Police Visit')}" >
+		                	v-bind:class="{'violent':(violent_crimes.includes(i.incident))/*'violent':(i.incident == 'Proactive Police Visit')*/}" >
 		                		<td>{{ k }}</td>
 				        		<td>{{ i.date }}</td>
 				        		<td>{{ i.time }}</td>
