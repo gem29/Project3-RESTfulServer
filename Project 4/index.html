@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
+		<link rel="stylesheet" href="style.css"/>
    		<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
 			   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
 			   crossorigin=""></script>
@@ -17,7 +18,9 @@
 			        el: "#app",
 			        data: 
 			        	{
-			        		crimes: {},
+			        		crimes: {
+
+			        		},
 			        		//codes: {},
 			        		neighborhoods: {
 			        			N1: {name: "Conway/Battlecreek/Highwood", count: 0, latlon: [44.949583, -93.018998]},
@@ -41,14 +44,14 @@
 			        		'view_latlon': [45,45],
 			        		'view_address': "",
 			        		checkedCases: [],
-			        		bounds: [(44.991548, -93.207680), (44.889845, -93.002029)] //NW x SE   	
+			        		bounds: [(44.991548, -93.207680), (44.889845, -93.002029)],
+			        		filters: {incident_type: [], neighborhood_name: [], start_date: '', end_date: '', start_time: '', end_time: ''}  	
 							
 			        	}
 			    });
 			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
 				  success: (data) => {
 				  	app.crimes = data;
-
 				  	/*
 				  	I19244992: Object
 					block: (...)
@@ -126,14 +129,48 @@
 				});
 				//L.map('mapid').setView(latlon, 12);
 			}
+
+			function clickCase(event){
+				
+
+			}
+
+			function filterCrimes(event){
+				console.log(app.filters);
+				/*
+				$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
+				  success: (data) => {
+
+				  }, 
+				  error: (err) => { console.log(err) }
+				});*/
+
+
+			}
 		</script>
 	</head>
 	<body onload="Init()">
+			<a href='about.html'>About</a>
 			<div id="app">
+			<H1>Search</H1>
 			<input type = "text" v-model="view_latlon" :placeholder="view_latlon"/>
 			<button type ="button" @click="SubmitLatLon">Send</button>
 			<input type = "text" v-model="view_address" placeholder="address"/>
 			<button type ="button" @click="SubmitAddress">Send</button>
+			<H1>Filters</H1>
+			<input type = "text" v-model="filters.incident_type" placeholder="All"/>
+			<select v-model="filters.neighborhood_name" placeholder="All">
+				<option value="volvo">Volvo</option>
+			    <option value="saab">Saab</option>
+			    <option value="fiat">Fiat</option>
+			    <option value="audi">Audi</option>
+			</select>
+			<input type = "text" v-model="filters.neighborhood_name" placeholder="All"/>
+			<input type = "text" v-model="filters.start_date" placeholder="2019/10/01"/>
+			<input type = "text" v-model="filters.end_date" placeholder="2019/10/31"/>
+			<input type = "text" v-model="filters.start_time" placeholder="00:00"/>
+			<input type = "text" v-model="filters.end_date" placeholder="11:59"/>
+			<button type ="button" @click="filterCrimes">Filter</button>
 			
 				<div class="scroll_table">
 		            <table style = "max-height: 23.5rem;
@@ -153,19 +190,21 @@
 		                    </tr>
 		                </thead>
 		                <tbody>
-		                	<tr v-for="(i,k) in crimes" v-if="mymap.getBounds().contains(app.neighborhoods['N'+i.neighborhood_number].latlon)">
+		                	<tr v-for="(i,k) in crimes" v-if="mymap.getBounds().contains(app.neighborhoods['N'+i.neighborhood_number].latlon)" 
+		                	v-bind:class="{'violent':(i.incident=='Proactive Police Visit')}" >
 		                		<td>{{ k }}</td>
 				        		<td>{{ i.date }}</td>
 				        		<td>{{ i.time }}</td>
 				        		<td>{{ i.incident }}</td>
 				        		<td>{{ i.police_grid }}</td>
-				        		<td>{{ app.neighborhoods['N'+i.neighborhood_number].name }}</td>
+				        		<td>{{ /*app.neighborhoods['N'+i.neighborhood_number].name*/ }}</td>
 				        		<td>{{ i.block }}</td>
 				        		<td>
 				        			<input type="checkbox" id='checkbox'>
 									<label></label>
 								</td>
 								<td></td>
+
 		                	</tr>
 		                </tbody>
 		            </table>
