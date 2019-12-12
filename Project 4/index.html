@@ -45,7 +45,7 @@
 							
 			        	}
 			    });
-			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10', {
+			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
 				  success: (data) => {
 				  	app.crimes = data;
 
@@ -130,7 +130,7 @@
 	</head>
 	<body onload="Init()">
 			<div id="app">
-			<input type = "text" v-model="view_latlon"/>
+			<input type = "text" v-model="view_latlon" :placeholder="view_latlon"/>
 			<button type ="button" @click="SubmitLatLon">Send</button>
 			<input type = "text" v-model="view_address" placeholder="address"/>
 			<button type ="button" @click="SubmitAddress">Send</button>
