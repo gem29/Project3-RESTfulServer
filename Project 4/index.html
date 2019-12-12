@@ -37,11 +37,15 @@
 								N15: {name: "Highland", count: 0, latlon: [44.910549, -93.173354]},
 								N16: {name: "Summit Hill", count: 0, latlon: [44.937188, -93.136739]},
 								N17: {name: "Capitol River", count: 0, latlon: [44.947789, -93.100049]}
-			        		}    	
+			        		},
+			        		'view_latlon': [45,45],
+			        		'view_address': "",
+			        		checkedCases: [],
+			        		bounds: [(44.991548, -93.207680), (44.889845, -93.002029)] //NW x SE   	
 							
 			        	}
 			    });
-			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31', {
+			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10', {
 				  success: (data) => {
 				  	app.crimes = data;
 
@@ -56,7 +60,7 @@
 					time: (...)
 					*/
 					
-					for(let i=1; i<Object.keys(app.crimes).length; i++)
+					for(let i=0; i<Object.keys(app.crimes).length; i++)
 					{
 						let crime = app.crimes[Object.keys(app.crimes)[i]];
 						//console.log(crime);
@@ -97,16 +101,40 @@
 				L.marker([44.978519, -93.066275]).addTo(mymap); //Payne-Phalen
 				L.marker([44.956374, -93.060962]).addTo(mymap);*/
 			};
+
+			function SubmitLatLon(event){
+				console.log(app.view_latlon);
+				lat = app.view_latlon.split(',');
+				console.log(lat);
+				let coords = L.latLng(lat[0],lat[1]);
+				console.log(coords);
+				mymap.setView(coords, 16);
+			}
+
+			function SubmitAddress(address){
+				console.log(app.view_address);
+				$.ajax('https://nominatim.openstreetmap.org/search?q='+app.view_address+'+st+paul&format=json&limit=1', {
+					success: (data) => {
+					  	//console.log(data);
+					  	let coords = L.latLng(data[0].lat, data[0].lon);
+					  	console.log(data[0].lon);
+					  	mymap.setView(coords, 16);
+
+
+					},
+				  	error: (err) => { console.log(err) }
+				});
+				//L.map('mapid').setView(latlon, 12);
+			}
 		</script>
 	</head>
 	<body onload="Init()">
 			<div id="app">
-			<form action="/action_page.php">
-			  Latitude: <input type="text" name="fname"><br>
-			  Longitude: <input type="text" name="lname"><br>
-			  Neighborhood: <input type="text" name="lname"><br>
-			  <input type="submit" value="Submit">
-			</form>
+			<input type = "text" v-model="view_latlon"/>
+			<button type ="button" @click="SubmitLatLon">Send</button>
+			<input type = "text" v-model="view_address" placeholder="address"/>
+			<button type ="button" @click="SubmitAddress">Send</button>
+			
 				<div class="scroll_table">
 		            <table style = "max-height: 23.5rem;
 		    						max-width: 940px;
@@ -125,7 +153,7 @@
 		                    </tr>
 		                </thead>
 		                <tbody>
-		                	<tr v-for="(i,k) in crimes">
+		                	<tr v-for="(i,k) in crimes" v-if="mymap.getBounds().contains(app.neighborhoods['N'+i.neighborhood_number].latlon)">
 		                		<td>{{ k }}</td>
 				        		<td>{{ i.date }}</td>
 				        		<td>{{ i.time }}</td>
@@ -133,6 +161,11 @@
 				        		<td>{{ i.police_grid }}</td>
 				        		<td>{{ app.neighborhoods['N'+i.neighborhood_number].name }}</td>
 				        		<td>{{ i.block }}</td>
+				        		<td>
+				        			<input type="checkbox" id='checkbox'>
+									<label></label>
+								</td>
+								<td></td>
 		                	</tr>
 		                </tbody>
 		            </table>
