@@ -14,6 +14,8 @@ var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
 
+
+
 // open stpaul_crime.sqlite3 database
 var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
@@ -21,8 +23,10 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     }
     else {
         console.log('Now connected to ' + db_filename);
-    }
+	}
 });
+
+
 
 var all_codes = [];
 db.all('select code from Codes order by code', (err, rows) => {
@@ -256,7 +260,7 @@ app.get('/incidents', (req,res) => {
 			incidents = js2xmlparser.parse('incidents', incidents);
 			format = 'xml';
 		}
-		console.log(incidents);
+		//console.log(incidents);
 		res.type(format).send(incidents);
 	});
 });

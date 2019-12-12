@@ -21,7 +21,7 @@
 			        		crimes: {
 
 			        		},
-			        		//codes: {},
+			        		codes: ['rape', 'theft'],
 			        		neighborhoods: {
 			        			N1: {name: "Conway/Battlecreek/Highwood", count: 0, latlon: [44.949583, -93.018998]},
 								N2: {name: "Greater East Side", count: 0, latlon: [44.977413, -93.025327]},
@@ -146,8 +146,26 @@
 				  error: (err) => { console.log(err) }
 				});*/
 
-
-			}
+				/*{ incident: 'Agg. Assault' },
+  { incident: 'Agg. Assault Dom.' },
+  { incident: 'Arson' },
+  { incident: 'Auto Theft' },
+  { incident: 'Burglary' },
+  { incident: 'Community Engagement Event' },
+  { incident: 'Discharge' },
+  { incident: 'Graffiti' },
+  { incident: 'Homicide' },
+  { incident: 'Narcotics' },
+  { incident: 'Other' },
+  { incident: 'Proactive Police Visit' },
+  { incident: 'Rape' },
+  { incident: 'Robbery' },
+  { incident: 'Simple Asasult Dom.' },
+  { incident: 'Simple Assault Dom.' },
+  { incident: 'Theft' },
+  { incident: 'Vandalism' },
+  { incident: 'test' }
+			}*/
 		</script>
 	</head>
 	<body onload="Init()">
@@ -159,18 +177,45 @@
 			<input type = "text" v-model="view_address" placeholder="address"/>
 			<button type ="button" @click="SubmitAddress">Send</button>
 			<H1>Filters</H1>
-			<input type = "text" v-model="filters.incident_type" placeholder="All"/>
-			<select v-model="filters.neighborhood_name" placeholder="All">
-				<option value="volvo">Volvo</option>
-			    <option value="saab">Saab</option>
-			    <option value="fiat">Fiat</option>
-			    <option value="audi">Audi</option>
+			<select name="Crimes" v-model="filters.incident_type" multiple>
+				<option value='Agg. Assault Dom.'>Agg. Assault Dom.</option>
+				<option value='Arson'>Arson</option>
+				<option value='Burglary'>Burglary</option>
+				<option value='Community Engagement Event'>Burglary</option>
+				<option value='Discharge'>Burglary</option>
+				<option value='Graffiti'>Burglary</option>
+				<option value='Homicide'>Burglary</option>
+				<option value='Narcotics'>Burglary</option>
+				<option value='Other'>Burglary</option>
+				<option value='Rape'>Burglary</option>	
+				<option value='Robbery'>Burglary</option>
+				<option value='Simple Asasult Dom.'>Simple Asasult Dom.</option>
+				<option value='Theft'>Burglary</option>
+				<option value='Vandalism'>Burglary</option>
 			</select>
-			<input type = "text" v-model="filters.neighborhood_name" placeholder="All"/>
-			<input type = "text" v-model="filters.start_date" placeholder="2019/10/01"/>
-			<input type = "text" v-model="filters.end_date" placeholder="2019/10/31"/>
-			<input type = "text" v-model="filters.start_time" placeholder="00:00"/>
-			<input type = "text" v-model="filters.end_date" placeholder="11:59"/>
+			<select name="Neighborhood" v-model="filters.neighborhood_name" multiple>
+			  <option value="Conway/Battlecreek/Highwood">Conway/Battlecreek/Highwood</option>
+			  <option value="Greater East Side">Greater East Side</option>
+			  <option value="West Side">West Side</option>
+			  <option value="Dayton's Bluff">Dayton's Bluff</option>
+			  <option value="North End">North End</option>
+			  <option value="Payne/Phalen">Payne/Phalen</option>
+			  <option value="Thomas/Dale(Frogtown)">Thomas/Dale(Frogtown)</option>
+			  <option value="Summit/University">Summit/University</option>
+			  <option value="West Seventh">West Seventh</option>
+			  <option value="Como">Como</option>
+			  <option value="Hamline/Midway">Hamline/Midway</option>
+			  <option value="St. Anthony">St. Anthony</option>
+			  <option value="Union Park">Union Park</option>
+			  <option value="Macalester-Groveland">Macalester-Groveland</option>
+			  <option value="Highland">Highland</option>
+			  <option value="Summit Hill">Summit Hill</option>
+			  <option value="Capitol River">Capitol River</option>
+			</select>
+			<input type = "date" v-model="filters.start_date" placeholder="2019/10/01"/>
+			<input type = "date" v-model="filters.end_date" placeholder="2019/10/31"/>
+			<input type = "time" v-model="filters.start_time" placeholder="00:00"/>
+			<input type = "time" v-model="filters.end_date" placeholder="11:59"/>
 			<button type ="button" @click="filterCrimes">Filter</button>
 			
 				<div class="scroll_table">
