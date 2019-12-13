@@ -42,6 +42,7 @@
 			        el: "#app",
 			        data: 
 			        	{
+			        		crime_api_url: '',
 			        		crimes: {
 
 			        		},
@@ -76,8 +77,8 @@
 							
 			        	}
 			    });
-			    console.log(crime_api_url + '/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100');
-			 	$.ajax(crime_api_url + '/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
+			    app.crime_api_url = 'http://cisc-dean.stthomas.edu:8051/';
+			 	$.ajax(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
 				  success: (data) => {
 				  	console.log(data);
 				  	app.crimes = data;
@@ -186,13 +187,13 @@
 				*/
 
 				//let nn = app.neighborhoods[n+app.filters.neighborhood_number]
-				let url = crime_api_url + '/incidents?limit=10000';
+				let url = app.crime_api_url + 'incidents?limit=10000';
 				if(app.filters.start_date != "") {
-					url = url + 'start_date='+app.filters.start_date;
+					url = url + '&start_date='+app.filters.start_date;
 				}
 
 				if(app.filters.end_date != "") {
-					url = url + 'end_date='+app.filters.end_date;
+					url = url + '&end_date='+app.filters.end_date;
 				}
 				console.log(app.filters.incident_type)
 				console.log(url);
@@ -203,7 +204,7 @@
 				  	for(let i = 0; i < Object.keys(data).length; i++) {
 				  		let key = Object.keys(data)[i];
 				  		//console.log(data[key].time);
-				  		//console.log(app.filters.end_time);
+				  		//onsole.log(app.filters.end_time);
 				  		if(data[key].time <= app.filters.end_time & data[key].time >= app.filters.start_time) {
 				  			//console.log(data[key].time);
 				  			//console.log(app.filters.end_time);

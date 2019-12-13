@@ -235,7 +235,7 @@ app.get('/incidents', (req,res) => {
     	neighborhood_list = req.query.neighborhood.split(',');
     }
     //console.log("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit);
-	db.all("Select * from Incidents where date_time >= '" + start_date + "' and date_time < '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit, (err, rows) => {
+	db.all("Select * from Incidents where date_time > '" + start_date + "' and date_time <= '" + end_date + "' and code in (" + code_list + ") and police_grid in (" + grid_list + ") and neighborhood_number in (" + neighborhood_list + ") order by date_time desc limit " + limit, (err, rows) => {
 		if(err) {console.log(err);}
 		//console.log(rows);
 		var incidents = {};
