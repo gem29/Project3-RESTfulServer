@@ -52,7 +52,7 @@
 							
 			        	}
 			    });
-			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
+			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10000', {
 				  success: (data) => {
 				  	app.crimes = data;
 				  	/*
@@ -70,16 +70,14 @@
 					{
 						let crime = app.crimes[Object.keys(app.crimes)[i]];
 						//console.log(crime);
-						//console.log(app.neighborhoods['N'+crime.neighborhood_number].count)*/
+						//console.log(app.neighborhoods['N'+crime.neighborhood_number].count)
 						app.neighborhoods['N'+crime.neighborhood_number].count = app.neighborhoods['N'+crime.neighborhood_number].count + 1;
 					}
+					 
 					for(let i = 1; i < Object.keys(app.neighborhoods).length + 1; i++)
 					{
 						L.marker(app.neighborhoods['N'+i].latlon, {icon: new L.divIcon({html: ' '+app.neighborhoods['N'+i].count+'', iconSize: 20, bgPos: [10,10]})}).addTo(mymap);
-						/*var popup = L.popup()
-						    .setLatLng(app.neighborhoods['N'+i].latlon)
-						    .setContent(app.neighborhoods['N'+i].count)
-						    .addTo(mymap);*/
+						
 
 						//console.log(app.neighborhoods['N'+i].latlon);
 					}
