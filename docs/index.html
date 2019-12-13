@@ -3,17 +3,41 @@
 	<head>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
 		<link rel="stylesheet" href="style.css"/>
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
    		<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
 			   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
 			   crossorigin=""></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
-		<div id="mapid" style = "height: 500px; width: auto"></div>
+		<script type="application/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    	<script type="application/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    	<div id="mapid" style = "height: 250px; width: auto"></div>
 		<script type="application/javascript" src="createmap.js"></script>
 		<script type="application/javascript">
 			var app;
+			var crime_api_url;
 
-			function Init() {
+
+			function Prompt() {
+				//console.log('Yes');
+	            $("#dialog-form").dialog({
+	                autoOpen: true,
+	                modal: true,
+	                width: "360px",
+	                buttons: {
+	                    "Ok": function() {
+	                        var prompt_input = $("#prompt_input");
+	                        Init(prompt_input.val());
+	                        $(this).dialog("close");
+	                    },
+	                    "Cancel": function() {
+	                        $(this).dialog("close");
+	                    }
+	                }
+	            });
+	        }
+
+			function Init(crime_api_url) {
 			    app = new Vue({
 			        el: "#app",
 			        data: 
@@ -52,8 +76,10 @@
 							
 			        	}
 			    });
-			 	$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10000', {
+			    console.log(crime_api_url + '/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100');
+			 	$.ajax(crime_api_url + '/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
 				  success: (data) => {
+				  	console.log(data);
 				  	app.crimes = data;
 				  	/*
 				  	I19244992: Object
@@ -76,10 +102,10 @@
 					 
 					for(let i = 1; i < Object.keys(app.neighborhoods).length + 1; i++)
 					{
-						L.marker(app.neighborhoods['N'+i].latlon, {icon: new L.divIcon({html: ' '+app.neighborhoods['N'+i].count+'', iconSize: 20, bgPos: [10,10]})}).addTo(mymap);
+						L.marker(app.neighborhoods['N'+i].latlon, {icon: new L.divIcon({html: ' '+app.neighborhoods['N'+i].count+'', iconSize: 20, bgPos: [10,10]}), title: app.neighborhoods['N'+i].name}).addTo(mymap);
 						
 
-						//console.log(app.neighborhoods['N'+i].latlon);
+						//console.log(app.neighborhoods['N'+i].name);
 					}
 
 				  },
@@ -123,7 +149,7 @@
 						  if(Array.isArray(data) && data.length) {
 						  	let coords = L.latLng(data[0].lat, data[0].lon);
 						  	console.log(data[0].lon);
-						  	mymap.setView(coords, 16);
+						  	mymap.setView(coords, 18);
 						  } else {
 						  	alert('Address not found')
 						  }
@@ -160,7 +186,7 @@
 				*/
 
 				//let nn = app.neighborhoods[n+app.filters.neighborhood_number]
-				let url = 'http://localhost:8000/incidents?limit=10000';
+				let url = crime_api_url + '/incidents?limit=10000';
 				if(app.filters.start_date != "") {
 					url = url + 'start_date='+app.filters.start_date;
 				}
@@ -196,18 +222,29 @@
 				  error: (err) => { console.log(err) }
 				});
 
+		        function Init(crime_api_url) {
+		            console.log(crime_api_url);
+		        }
+
 				
 			}
 		</script>
 	</head>
-	<body onload="Init()">
+	<body onload="Prompt()">
 			<a href='about.html'>About</a>
+
+			<div id="dialog-form">
+		        <label for="name">URL for St. Paul Crime API:</label>
+		        <input type="text" id="prompt_input" class="text ui-widget-content ui-corner-all" style="width: 320px;" />
+		    </div>
 			<div id="app">
-			<H1>Search</H1>
-			<input type = "text" v-model="view_latlon" :placeholder="view_latlon"/>
-			<button type ="button" @click="SubmitLatLon">Send</button>
-			<input type = "text" v-model="view_address" placeholder="address"/>
-			<button type ="button" @click="SubmitAddress">Send</button>
+				<div id=Searches>
+					<H1>Search</H1>
+					<input type = "text" v-model="view_latlon" :placeholder="view_latlon" class = 'search'/>
+					<button type ="button" @click="SubmitLatLon">Send</button>
+					<input type = "text" v-model="view_address" :placeholder="view_address" class = 'search'/>
+					<button type ="button" @click="SubmitAddress">Send</button>
+				</div>
 			<H1>Filters</H1>
 			<select name="Crimes" v-model="filters.incident_type" height="500px" multiple>
 				<option value='Agg. Assault'>Agg. Assault</option>

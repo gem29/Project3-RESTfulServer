@@ -54,7 +54,22 @@ function onMapClick(e) {
 
 function onMoveEnd(e) {
 	let coords = mymap.getCenter();
-	app.view_latlon = coords.lat.toFixed(3) + "," + coords.lng.toFixed(3);
+		app.view_latlon = coords.lat + "," + coords.lng;
+	//https://nominatim.openstreetmap.org/reverse?format=xml&lat=44.949583&lon=-93.018998
+	console.log('https://nominatim.openstreetmap.org/reverse?format=json&lat='+coords.lat+'&lon='+coords.lng);
+
+	$.ajax('https://nominatim.openstreetmap.org/reverse?format=json&lat='+coords.lat+'&lon='+coords.lng, {
+					success: (data) => {
+					  	console.log(data);
+					  	if(data.address.house_number) {
+					  		app.view_address = data.address.house_number + " "  + data.address.road;
+					  	} else
+					  	{
+					  		app.view_address = data.address.road;
+					  	}		
+					},
+				  	error: (err) => { console.log(err) }
+				});
 	//onsole.log(app.view_latlon.toString().substring(6));
 	app.bounds = mymap.getBounds();
 }
