@@ -41,12 +41,14 @@
 								N16: {name: "Summit Hill", count: 0, latlon: [44.937188, -93.136739]},
 								N17: {name: "Capitol River", count: 0, latlon: [44.947789, -93.100049]}
 			        		},
-			        		'view_latlon': [45,45],
+			        		'view_latlon': [44.9537, -93.0900],
 			        		'view_address': "",
 			        		checkedCases: [],
 			        		bounds: [(44.991548, -93.207680), (44.889845, -93.002029)],
 			        		filters: {incident_type: [], neighborhood_name: [], start_date: '', end_date: '', start_time: '', end_time: ''},
-			        		violent_crimes: ['Agg. Assault Dom.', 'Agg. Assault Dom', 'Burglary', 'Homicide', 'Rape', 'Robbery', 'Simple Asasult Dom.']  	
+			        		violent_crimes: ['Agg. Assault Dom.', 'Agg. Assault Dom', 'Homicide', 'Rape', 'Robbery', 'Simple Asasult Dom.', 'Agg. Assault'],
+			        		property_crimes: ['Arson', 'Burglary', 'Graffiti', 'Vandalism', 'Theft', 'Auto Theft'],
+			        		other_crimes: ['Community Engagement Event', 'Discharge', 'Narcotics', 'Other', 'Proactive Police Visit']  	
 							
 			        	}
 			    });
@@ -119,10 +121,14 @@
 				console.log(app.view_address);
 				$.ajax('https://nominatim.openstreetmap.org/search?q='+app.view_address+'+st+paul&format=json&limit=1', {
 					success: (data) => {
-					  	//console.log(data);
-					  	let coords = L.latLng(data[0].lat, data[0].lon);
-					  	console.log(data[0].lon);
-					  	mymap.setView(coords, 16);
+					  	console.log(data);
+						  if(Array.isArray(data) && data.length) {
+						  	let coords = L.latLng(data[0].lat, data[0].lon);
+						  	console.log(data[0].lon);
+						  	mymap.setView(coords, 16);
+						  } else {
+						  	alert('Address not found')
+						  }
 
 
 					},
@@ -138,33 +144,61 @@
 
 			function filterCrimes(event){
 				console.log(app.filters);
-				/*
-				$.ajax('http://localhost:8000/incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
-				  success: (data) => {
 
+				/*
+				end_date: "2019-10-22"
+				end_time: "12:00"
+				incident_type: Array(4)
+					0: "Agg. Assault"
+					1: "Homicide"
+					2: "Other"
+					3: "Proactive Police Visit"
+				neighborhood_name: Array(3)
+					0: "Greater East Side"
+					1: "West Side"
+					2: "Dayton's Bluff"
+				start_date: "2019-10-08"
+				start_time: "00:00"
+				*/
+
+				//let nn = app.neighborhoods[n+app.filters.neighborhood_number]
+				let url = 'http://localhost:8000/incidents?limit=10000';
+				if(app.filters.start_date != "") {
+					url = url + 'start_date='+app.filters.start_date;
+				}
+
+				if(app.filters.end_date != "") {
+					url = url + 'end_date='+app.filters.end_date;
+				}
+				console.log(app.filters.incident_type)
+				console.log(url);
+				$.ajax(url, {
+				  success: (data) => {
+				  	console.log(data);
+				  	let template = {};
+				  	for(let i = 0; i < Object.keys(data).length; i++) {
+				  		let key = Object.keys(data)[i];
+				  		//console.log(data[key].time);
+				  		//console.log(app.filters.end_time);
+				  		if(data[key].time <= app.filters.end_time & data[key].time >= app.filters.start_time) {
+				  			//console.log(data[key].time);
+				  			//console.log(app.filters.end_time);
+					  		if(data[key].incident == app.filters.incident_type) {
+					  			template[key] = data[key];
+					  		}
+					  	} else {
+					  		//console.log(data[key].time);
+					  		//console.log(app.filters.end_time);
+					  	}
+				  	}
+
+				  	console.log(template);
+				  	app.crimes = template;
 				  }, 
 				  error: (err) => { console.log(err) }
-				});*/
+				});
 
-				/*{ incident: 'Agg. Assault' },
-  { incident: 'Agg. Assault Dom'.' },
-  { incident: 'Arson' },
-  { incident: 'Auto Theft' },
-  { incident: 'Burglary' },
-  { incident: 'Community Engagement Event' },
-  { incident: 'Discharge' },
-  { incident: 'Graffiti' },
-  { incident: 'Homicide' },
-  { incident: 'Narcotics' },
-  { incident: 'Other' },
-  { incident: 'Proactive Police Visit' },
-  { incident: 'Rape' },
-  { incident: 'Robbery' },
-  { incident: 'Simple Asasult Dom.' },
-  { incident: 'Simple Assault Dom.' },
-  { incident: 'Theft' },
-  { incident: 'Vandalism' },
-  { incident: 'test' }*/
+				
 			}
 		</script>
 	</head>
@@ -178,20 +212,23 @@
 			<button type ="button" @click="SubmitAddress">Send</button>
 			<H1>Filters</H1>
 			<select name="Crimes" v-model="filters.incident_type" height="500px" multiple>
+				<option value='Agg. Assault'>Agg. Assault</option>
 				<option value='Agg. Assault Dom.'>Agg. Assault Dom.</option>
+				<option value='Auto Theft'>Auto Theft</option>
 				<option value='Arson'>Arson</option>
 				<option value='Burglary'>Burglary</option>
-				<option value='Community Engagement Event'>Burglary</option>
-				<option value='Discharge'>Burglary</option>
-				<option value='Graffiti'>Burglary</option>
-				<option value='Homicide'>Burglary</option>
-				<option value='Narcotics'>Burglary</option>
-				<option value='Other'>Burglary</option>
-				<option value='Rape'>Burglary</option>	
-				<option value='Robbery'>Burglary</option>
+				<option value='Community Engagement Event'>Community Engagement Event</option>
+				<option value='Discharge'>Discharge</option>
+				<option value='Graffiti'>Graffiti</option>
+				<option value='Homicide'>Homicide</option>
+				<option value='Narcotics'>Narcotics</option>
+				<option value='Other'>Other</option>
+				<option value='Proactive Police Visit'>Proactive Police Visit</option>
+				<option value='Rape'>Rape</option>	
+				<option value='Robbery'>Robbery</option>
 				<option value='Simple Asasult Dom.'>Simple Asasult Dom.</option>
-				<option value='Theft'>Burglary</option>
-				<option value='Vandalism'>Burglary</option>
+				<option value='Theft'>Theft</option>
+				<option value='Vandalism'>Vandalism</option>
 			</select>
 			<select name="Neighborhood" v-model="filters.neighborhood_name" multiple>
 			  <option value="Conway/Battlecreek/Highwood">Conway/Battlecreek/Highwood</option>
@@ -212,10 +249,14 @@
 			  <option value="Summit Hill">Summit Hill</option>
 			  <option value="Capitol River">Capitol River</option>
 			</select>
-			<input type = "date" v-model="filters.start_date" placeholder="2019/10/01"/>
-			<input type = "date" v-model="filters.end_date" placeholder="2019/10/31"/>
-			<input type = "time" v-model="filters.start_time" placeholder="00:00"/>
-			<input type = "time" v-model="filters.end_date" placeholder="11:59"/>
+			<input type = "date" v-model="filters.start_date"/>
+
+			<input type = "date" v-model="filters.end_date"/>
+
+			<input type = "time" v-model="filters.start_time"/>
+
+			<input type = "time" v-model="filters.end_time"/>
+
 			<button type ="button" @click="filterCrimes">Filter</button>
 			
 				<div class="scroll_table">
@@ -225,6 +266,7 @@
 		    						overflow: scroll;
 		    						border: solid 1px black;">
 		                <thead>
+		                	<legend><b>Red:</b> <span class="violent">Violent Crimes</span> <b>Green</b>: <span class="property">Property Crimes</span> <b>Blue:</b> <span class="other">Other Crimes</span></legend>
 		                    <tr>
 		                        <th>Case</th>
 		                        <th>Date</th>
@@ -237,13 +279,13 @@
 		                </thead>
 		                <tbody>
 		                	<tr v-for="(i,k) in crimes" v-if="mymap.getBounds().contains(app.neighborhoods['N'+i.neighborhood_number].latlon)" 
-		                	v-bind:class="{'violent':(violent_crimes.includes(i.incident))/*'violent':(i.incident == 'Proactive Police Visit')*/}" >
+		                	v-bind:class="{'violent':(violent_crimes.includes(i.incident)), 'property':(property_crimes.includes(i.incident)), 'other':(other_crimes.includes(i.incident))}" >
 		                		<td>{{ k }}</td>
 				        		<td>{{ i.date }}</td>
 				        		<td>{{ i.time }}</td>
 				        		<td>{{ i.incident }}</td>
 				        		<td>{{ i.police_grid }}</td>
-				        		<td>{{ /*app.neighborhoods['N'+i.neighborhood_number].name*/ }}</td>
+				        		<td>{{ app.neighborhoods['N'+i.neighborhood_number].name }}</td>
 				        		<td>{{ i.block }}</td>
 				        		<td>
 				        			<input type="checkbox" id='checkbox'>

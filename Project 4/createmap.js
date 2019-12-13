@@ -55,7 +55,7 @@ function onMapClick(e) {
 function onMoveEnd(e) {
 	let coords = mymap.getCenter();
 	app.view_latlon = coords.lat.toFixed(3) + "," + coords.lng.toFixed(3);
-	console.log(app.view_latlon.toString().substring(6));
+	//onsole.log(app.view_latlon.toString().substring(6));
 	app.bounds = mymap.getBounds();
 }
 

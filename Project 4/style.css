@@ -4,6 +4,14 @@
     color: red;
 }
 
+.property {
+    color: green;
+}
+
+.other {
+    color: blue;
+}
+
 
 .leaflet-pane,
 .leaflet-tile,
