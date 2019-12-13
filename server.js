@@ -6,7 +6,7 @@ var js2xmlparser = require("js2xmlparser");
 var sqlite3 = require('sqlite3');
 var cors = require('cors');
 
-var port = 8000;
+var port = parseInt(process.argv[2]);
 var public_dir = path.join(__dirname, 'public');
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 var app = express();
