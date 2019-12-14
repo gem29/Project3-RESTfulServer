@@ -78,8 +78,9 @@
 							
 			        	}
 			    });
+			    console.log(crime_api_url);
 			    app.crime_api_url = crime_api_url;
-			    console.log(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100');
+			    console.log(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10000');
 			 	$.ajax(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
 				  success: (data) => {
 				  	console.log(data);
