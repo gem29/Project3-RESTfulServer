@@ -80,8 +80,8 @@
 			    });
 			    console.log(crime_api_url);
 			    app.crime_api_url = crime_api_url;
-			    console.log(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=10000');
-			 	$.ajax(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-10-31&limit=100', {
+			    console.log(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-11-01&limit=10000');
+			 	$.ajax(crime_api_url + 'incidents?start_date=2019-10-01&end_date=2019-11-01&limit=10000', {
 				  success: (data) => {
 				  	console.log(data);
 				  	app.crimes = data;
@@ -198,6 +198,9 @@
 				if(app.filters.end_date != "") {
 					url = url + '&end_date='+app.filters.end_date;
 				}
+				if(app.filters.incident_type != []) {
+					url = url + '&incident_type='+app.filters.end_date;
+				}
 				console.log(app.filters.incident_type)
 				console.log(url);
 				$.ajax(url, {
@@ -209,19 +212,27 @@
 				  		//console.log(data[key].time);
 				  		//onsole.log(app.filters.end_time);
 				  		if(data[key].time <= app.filters.end_time & data[key].time >= app.filters.start_time) {
-				  			//console.log(data[key].time);
-				  			//console.log(app.filters.end_time);
-					  		if(data[key].incident == app.filters.incident_type) {
-					  			template[key] = data[key];
-					  		}
-					  	} else {
-					  		//console.log(data[key].time);
-					  		//console.log(app.filters.end_time);
-					  	}
-				  	}
-
+					  		template[key] = data[key];
+					  	};
+				  	};
 				  	console.log(template);
 				  	app.crimes = template;
+				  	for(let i=0; i<Object.keys(app.crimes).length; i++)
+					{
+						let crime = app.crimes[Object.keys(app.crimes)[i]];
+						//console.log(crime);
+						//console.log(app.neighborhoods['N'+crime.neighborhood_number].count)
+						app.neighborhoods['N'+crime.neighborhood_number].count = app.neighborhoods['N'+crime.neighborhood_number].count + 1;
+					}
+					 
+					for(let i = 1; i < Object.keys(app.neighborhoods).length + 1; i++)
+					{
+						L.marker(app.neighborhoods['N'+i].latlon, {icon: new L.divIcon({html: ' '+app.neighborhoods['N'+i].count+'', iconSize: 20, bgPos: [10,10]}), title: app.neighborhoods['N'+i].name}).addTo(mymap);
+						
+
+						//console.log(app.neighborhoods['N'+i].name);
+					}
+
 				  }, 
 				  error: (err) => { console.log(err) }
 				});
